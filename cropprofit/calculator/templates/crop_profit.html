@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор прибутку</title>
+</head>
+<body>
+    <h1>Розрахунок прибутку від посіву</h1>
+
+<!-- crop_profit.html -->
+<form method="post" id="crop-form">
+    {% csrf_token %}
+    <div>
+        <label for="id_season">Вибери сезон:</label>
+        {{ form.season }}
+    </div>
+    <div>
+        <label for="id_culture">Вибери культуру:</label>
+        {{ form.culture }}
+    </div>
+    <div>
+        <label for="id_number_of_beds">Кількість грядок:</label>
+        {{ form.number_of_beds }}
+    </div>
+    <button type="submit">Розрахувати</button>
+</form>
+
+{% if profit %}
+    <h3>{{ profit }}</h3>
+{% endif %}
+
+{% if culture_info %}
+    <p><strong>Культура:</strong> {{ culture_info.culture }}</p>
+    <p><strong>Ціна закупки:</strong> {{ culture_info.purchase_price }} грн</p>
+    <p><strong>Ціна закупри при {{ culture_info.number_of_beds }} рядках(ів).:</strong> {{ culture_info.zakupka_zagal }} грн</p>
+    <p><strong>Ціна продажу:</strong> {{ culture_info.P1 }} грн</p>
+    <p><strong>Ціна продажу:</strong> {{ culture_info.P2 }} грн</p>
+    <p><strong>Ціна продажу:</strong> {{ culture_info.P3 }} грн</p>
+    <p><strong>Ціна продажу:</strong> {{ culture_info.P4 }} грн</p>
+    <p><strong>Ціна продажу з кадки:</strong> {{ culture_info.profit_kadka }} грн</p>
+    <p><strong>Ціна продажу з бочонка:</strong> {{ culture_info.profit_bochonok }} грн</p>
+{% endif %}
+
+<script>
+    // Обробка зміни сезону через AJAX
+    document.getElementById('id_season').addEventListener('change', function() {
+        var season = this.value;
+
+        fetch("{% url 'update_cultures' %}?season=" + season)
+            .then(response => response.json())
+            .then(data => {
+                var cultureSelect = document.getElementById('id_culture');
+                cultureSelect.innerHTML = '';
+                data.cultures.forEach(function(culture) {
+                    var option = document.createElement('option');
+                    option.value = culture;
+                    option.textContent = culture.charAt(0).toUpperCase() + culture.slice(1);
+                    cultureSelect.appendChild(option);
+                });
+            });
+    });
+</script>
+</body>
+</html>
